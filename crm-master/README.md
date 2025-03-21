@@ -87,7 +87,6 @@ mvn spring-boot:run
 
 ```
 
-
 1. Access the CRM application in your web browser at `http://localhost:8080`.
 
 ## Features

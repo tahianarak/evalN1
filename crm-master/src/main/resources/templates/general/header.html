@@ -26,6 +26,9 @@
                 <!-- Search -->
                 <!-- ============================================================== -->
             </ul>
+            <a th:if="${#authorization.expression('hasRole(''ROLE_MANAGER'')')}"
+               th:href="@{/manager/deleteData}"<button class="reinitialiser-btn">reinitialiser</button></a>
+
             <!-- ============================================================== -->
             <!-- User profile and search -->
             <!-- ============================================================== -->
@@ -73,3 +76,30 @@
         </div>
     </nav>
 </header>
+<style>
+    /* Stylisation du bouton */
+    .reinitialiser-btn {
+        background-color: #4CAF50; /* Couleur de fond verte */
+        color: white; /* Texte en blanc */
+        border: none; /* Retirer la bordure */
+        padding: 10px 20px; /* Padding pour agrandir le bouton */
+        text-align: center; /* Centrer le texte */
+        text-decoration: none; /* Supprimer la décoration du texte */
+        display: inline-block; /* Garder le bouton en ligne */
+        font-size: 16px; /* Taille de la police */
+        border-radius: 5px; /* Coins arrondis */
+        cursor: pointer; /* Changer le curseur au survol */
+        transition: background-color 0.3s ease; /* Effet de transition pour la couleur de fond */
+    }
+
+    /* Effet au survol */
+    .reinitialiser-btn:hover {
+        background-color: #45a049; /* Couleur plus foncée au survol */
+    }
+
+    /* Effet au focus (quand le bouton est sélectionné) */
+    .reinitialiser-btn:focus {
+        outline: none; /* Retirer la bordure bleue par défaut */
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* Ajoute une ombre portée au focus */
+    }
+</style>
