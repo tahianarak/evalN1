@@ -505,3 +505,26 @@ CREATE TABLE IF NOT EXISTS `google_drive_file` (
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+CREATE TABLE IF NOT EXISTS  depense(
+   id_depense INT AUTO_INCREMENT,
+   montant DECIMAL(15,2),
+   date_ens DATE,
+   lead_id int unsigned NULL,
+   ticket_id INT unsigned NULL,
+   PRIMARY KEY(id_depense),
+   FOREIGN KEY(lead_id) REFERENCES trigger_lead(lead_id),
+   FOREIGN KEY(ticket_id) REFERENCES trigger_ticket(ticket_id)
+);
+
+
+CREATE TABLE IF NOT EXISTS <customer_budget(
+   id_budget_customer INT,
+   date_ens DATE,
+   montant DECIMAL(15,2),
+   customer_id INT NOT NULL,
+   PRIMARY KEY(id_budget_customer),
+   FOREIGN KEY(customer_id) REFERENCES customer(customer_id)
+);
+
+

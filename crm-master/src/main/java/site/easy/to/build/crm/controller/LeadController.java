@@ -25,6 +25,8 @@ import site.easy.to.build.crm.google.service.acess.GoogleAccessService;
 import site.easy.to.build.crm.google.service.calendar.GoogleCalendarApiService;
 import site.easy.to.build.crm.google.service.drive.GoogleDriveApiService;
 import site.easy.to.build.crm.google.service.gmail.GoogleGmailApiService;
+import site.easy.to.build.crm.my.model.Depense;
+import site.easy.to.build.crm.my.service.DepenseService;
 import site.easy.to.build.crm.service.customer.CustomerService;
 import site.easy.to.build.crm.service.drive.GoogleDriveFileService;
 import site.easy.to.build.crm.service.file.FileService;
@@ -48,6 +50,7 @@ import java.util.regex.Pattern;
 public class LeadController {
 
     private final LeadService leadService;
+    DepenseService depenseService;
     private final AuthenticationUtils authenticationUtils;
     private final UserService userService;
     private final CustomerService customerService;
@@ -65,7 +68,7 @@ public class LeadController {
     public LeadController(LeadService leadService, AuthenticationUtils authenticationUtils, UserService userService, CustomerService customerService,
                           LeadActionService leadActionService, GoogleCalendarApiService googleCalendarApiService, FileService fileService,
                           GoogleDriveApiService googleDriveApiService, GoogleDriveFileService googleDriveFileService, FileUtil fileUtil,
-                          LeadEmailSettingsService leadEmailSettingsService, GoogleGmailApiService googleGmailApiService, EntityManager entityManager) {
+                          LeadEmailSettingsService leadEmailSettingsService, GoogleGmailApiService googleGmailApiService, EntityManager entityManager ,DepenseService depenseService1) {
         this.leadService = leadService;
         this.authenticationUtils = authenticationUtils;
         this.userService = userService;
@@ -79,6 +82,7 @@ public class LeadController {
         this.leadEmailSettingsService = leadEmailSettingsService;
         this.googleGmailApiService = googleGmailApiService;
         this.entityManager = entityManager;
+        this.depenseService=depenseService1;
     }
 
     @GetMapping("/show/{id}")
@@ -168,7 +172,7 @@ public class LeadController {
     public String createLead(@ModelAttribute("lead") @Validated Lead lead, BindingResult bindingResult,
                              @RequestParam("customerId") int customerId, @RequestParam("employeeId") int employeeId,
                              Authentication authentication, @RequestParam("allFiles")@Nullable String files,
-                             @RequestParam("folderId") @Nullable String folderId, Model model) throws JsonProcessingException {
+                             @RequestParam("folderId") @Nullable String folderId, Model model)throws Exception {
 
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         User manager = userService.findById(userId);
@@ -191,7 +195,12 @@ public class LeadController {
         lead.setEmployee(employee);
         lead.setManager(manager);
         lead.setGoogleDriveFolderId(folderId);
-        lead.setCreatedAt(LocalDateTime.now());
+        LocalDateTime now=LocalDateTime.now();
+        lead.setCreatedAt(now);
+
+        Depense depense=new Depense();
+        depense.setMontant(lead.getMontant());
+        depense.setDateEns(now);
 
         ObjectMapper objectMapper = new ObjectMapper();
         List<Attachment> allFiles = objectMapper.readValue(files, new TypeReference<List<Attachment>>() {
@@ -208,7 +217,11 @@ public class LeadController {
             }
         }
 
+
         Lead createdLead = leadService.save(lead);
+        depense.setLeadId(createdLead.getLeadId());
+        depenseService.insertDepense(depense);
+
         fileUtil.saveFiles(allFiles, createdLead);
 
         if (lead.getGoogleDrive() != null) {

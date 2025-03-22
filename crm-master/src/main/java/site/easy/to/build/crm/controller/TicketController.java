@@ -15,6 +15,8 @@ import site.easy.to.build.crm.entity.*;
 import site.easy.to.build.crm.entity.settings.TicketEmailSettings;
 import site.easy.to.build.crm.google.service.acess.GoogleAccessService;
 import site.easy.to.build.crm.google.service.gmail.GoogleGmailApiService;
+import site.easy.to.build.crm.my.model.Depense;
+import site.easy.to.build.crm.my.service.DepenseService;
 import site.easy.to.build.crm.service.customer.CustomerService;
 import site.easy.to.build.crm.service.settings.TicketEmailSettingsService;
 import site.easy.to.build.crm.service.ticket.TicketService;
@@ -42,10 +44,12 @@ public class TicketController {
     private final GoogleGmailApiService googleGmailApiService;
     private final EntityManager entityManager;
 
+    DepenseService depenseService;
+
 
     @Autowired
     public TicketController(TicketService ticketService, AuthenticationUtils authenticationUtils, UserService userService, CustomerService customerService,
-                            TicketEmailSettingsService ticketEmailSettingsService, GoogleGmailApiService googleGmailApiService, EntityManager entityManager) {
+                            TicketEmailSettingsService ticketEmailSettingsService, GoogleGmailApiService googleGmailApiService, EntityManager entityManager,DepenseService depenseService1) {
         this.ticketService = ticketService;
         this.authenticationUtils = authenticationUtils;
         this.userService = userService;
@@ -53,6 +57,7 @@ public class TicketController {
         this.ticketEmailSettingsService = ticketEmailSettingsService;
         this.googleGmailApiService = googleGmailApiService;
         this.entityManager = entityManager;
+        this.depenseService=depenseService1;
     }
 
     @GetMapping("/show-ticket/{id}")
@@ -125,7 +130,7 @@ public class TicketController {
     @PostMapping("/create-ticket")
     public String createTicket(@ModelAttribute("ticket") @Validated Ticket ticket, BindingResult bindingResult, @RequestParam("customerId") int customerId,
                                @RequestParam Map<String, String> formParams, Model model,
-                               @RequestParam("employeeId") int employeeId, Authentication authentication) {
+                               @RequestParam("employeeId") int employeeId, Authentication authentication) throws Exception{
 
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         User manager = userService.findById(userId);
@@ -167,9 +172,17 @@ public class TicketController {
         ticket.setCustomer(customer);
         ticket.setManager(manager);
         ticket.setEmployee(employee);
-        ticket.setCreatedAt(LocalDateTime.now());
+        LocalDateTime now =LocalDateTime.now();
+        ticket.setCreatedAt(now);
 
-        ticketService.save(ticket);
+        Depense depense=new Depense();
+        depense.setMontant(ticket.getMontant());
+        depense.setDateEns(now);
+
+        Ticket ticketCreated=ticketService.save(ticket);
+        depense.setTicketId(ticketCreated.getTicketId());
+
+        depenseService.insertDepense(depense);
 
         return "redirect:/employee/ticket/assigned-tickets";
     }

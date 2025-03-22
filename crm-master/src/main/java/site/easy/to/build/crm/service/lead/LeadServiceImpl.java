@@ -1,18 +1,23 @@
 package site.easy.to.build.crm.service.lead;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import site.easy.to.build.crm.entity.Customer;
+import site.easy.to.build.crm.my.model.Depense;
 import site.easy.to.build.crm.repository.LeadRepository;
 import site.easy.to.build.crm.entity.Lead;
 
+import javax.sql.DataSource;
 import java.util.List;
 
 @Service
 public class LeadServiceImpl implements LeadService {
 
     private final LeadRepository leadRepository;
+    @Autowired
+    DataSource dataSource;
 
     public LeadServiceImpl(LeadRepository leadRepository) {
         this.leadRepository = leadRepository;
@@ -43,7 +48,10 @@ public class LeadServiceImpl implements LeadService {
         return leadRepository.findByMeetingId(meetingId);
     }
     @Override
-    public Lead save(Lead lead) {
+    public Lead save(Lead lead)
+    {
+        Depense depense=new Depense();
+
         return leadRepository.save(lead);
     }
 

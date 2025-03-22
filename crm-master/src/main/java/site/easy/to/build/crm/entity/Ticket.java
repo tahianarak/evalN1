@@ -3,6 +3,7 @@ package site.easy.to.build.crm.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import org.hibernate.mapping.ToOne;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,12 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ticket_id")
     private int ticketId;
+
+
+
+    @Transient
+    @Positive(message = "Le prix doit être un nombre positif.")
+    double montant;
 
     @Column(name = "subject")
     @NotBlank(message = "Subject is required")
@@ -60,6 +67,14 @@ public class Ticket {
         this.employee = employee;
         this.customer = customer;
         this.createdAt = createdAt;
+    }
+
+    public double getMontant() {
+        return montant;
+    }
+
+    public void setMontant(double montant) {
+        this.montant = montant;
     }
 
     public int getTicketId() {

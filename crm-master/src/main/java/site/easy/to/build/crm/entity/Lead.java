@@ -3,6 +3,7 @@ package site.easy.to.build.crm.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,6 +11,11 @@ import java.util.List;
 @Entity
 @Table(name = "trigger_lead")
 public class Lead {
+
+    @Transient
+    @Positive(message = "Le prix doit être un nombre positif.")
+    double montant;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "lead_id")
@@ -128,6 +134,14 @@ public class Lead {
     public String getGoogleDriveFolderId() {
         return googleDriveFolderId;
     }
+    public double getMontant() {
+        return montant;
+    }
+
+    public void setMontant(double montant) {
+        this.montant = montant;
+    }
+
 
     public void setGoogleDriveFolderId(String googleDriveFolderId) {
         this.googleDriveFolderId = googleDriveFolderId;
