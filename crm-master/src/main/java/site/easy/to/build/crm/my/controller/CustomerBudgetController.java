@@ -29,7 +29,7 @@ public class CustomerBudgetController
     public String insertFormulaire(Model model)
     {
         List<Customer> customers=customerService.findAll();
-        model.addAttribute("customes",customers);
+        model.addAttribute("customers",customers);
         return "budget/formulaire";
     }
 

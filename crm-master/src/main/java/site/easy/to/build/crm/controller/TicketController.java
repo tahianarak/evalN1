@@ -1,6 +1,7 @@
 package site.easy.to.build.crm.controller;
 
 import jakarta.persistence.EntityManager;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -60,6 +61,24 @@ public class TicketController {
         this.depenseService=depenseService1;
     }
 
+    @PostMapping("/confirmer")
+    public String confirmerTransaction(HttpSession session) throws Exception {
+        Depense depense=(Depense) session.getAttribute("depense");
+        Ticket ticket=(Ticket)session.getAttribute("ticket");
+        session.removeAttribute("depense");
+        session.removeAttribute("ticket");
+        Ticket ticketCreated=ticketService.save(ticket);
+        depense.setTicketId(ticketCreated.getTicketId());
+        String alerte=depenseService.insertDepense(depense,ticketCreated.getCustomer().getCustomerId());
+        return "redirect:/employee/ticket/assigned-tickets";
+    }
+
+    @PostMapping("/annuler")
+    public String annulerTransaction(HttpSession session) throws Exception {
+        session.removeAttribute("depense");
+        session.removeAttribute("ticket");
+        return "redirect:/employee/ticket/assigned-tickets";
+    }
     @GetMapping("/show-ticket/{id}")
     public String showTicketDetails(@PathVariable("id") int id, Model model, Authentication authentication) {
         int userId = authenticationUtils.getLoggedInUserId(authentication);
@@ -97,10 +116,12 @@ public class TicketController {
     }
 
     @GetMapping("/assigned-tickets")
-    public String showEmployeeTicket(Model model, Authentication authentication) {
+    public String showEmployeeTicket(Model model, Authentication authentication,@RequestParam(name = "alerte", required = false) String alerte) {
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         List<Ticket> tickets = ticketService.findEmployeeTickets(userId);
+        System.out.println(alerte);
         model.addAttribute("tickets",tickets);
+        model.addAttribute("alerte",alerte);
         return "ticket/my-tickets";
     }
     @GetMapping("/create-ticket")
@@ -130,7 +151,7 @@ public class TicketController {
     @PostMapping("/create-ticket")
     public String createTicket(@ModelAttribute("ticket") @Validated Ticket ticket, BindingResult bindingResult, @RequestParam("customerId") int customerId,
                                @RequestParam Map<String, String> formParams, Model model,
-                               @RequestParam("employeeId") int employeeId, Authentication authentication) throws Exception{
+                               @RequestParam("employeeId") int employeeId, Authentication authentication, HttpSession session) throws Exception{
 
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         User manager = userService.findById(userId);
@@ -179,12 +200,22 @@ public class TicketController {
         depense.setMontant(ticket.getMontant());
         depense.setDateEns(now);
 
+        //pop-up depassement budget
+        if(!depenseService.checkBudget(depense,ticket.getCustomer().getCustomerId()))
+        {
+            session.setAttribute("ticket",ticket);
+            session.setAttribute("depense",depense);
+            model.addAttribute("popUp",true);
+
+            return "ticket/create-ticket";
+        }
+
         Ticket ticketCreated=ticketService.save(ticket);
         depense.setTicketId(ticketCreated.getTicketId());
 
-        depenseService.insertDepense(depense);
+        String alerte=depenseService.insertDepense(depense,ticketCreated.getCustomer().getCustomerId());
 
-        return "redirect:/employee/ticket/assigned-tickets";
+        return "redirect:/employee/ticket/assigned-tickets?alerte="+alerte;
     }
 
     @GetMapping("/update-ticket/{id}")
@@ -314,7 +345,7 @@ public class TicketController {
     }
 
     @PostMapping("/delete-ticket/{id}")
-    public String deleteTicket(@PathVariable("id") int id, Authentication authentication){
+    public String deleteTicket(@PathVariable("id") int id, Authentication authentication) throws Exception {
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         User loggedInUser = userService.findById(userId);
         if(loggedInUser.isInactiveUser()) {
@@ -327,8 +358,9 @@ public class TicketController {
         if(!AuthorizationUtil.checkIfUserAuthorized(employee,loggedInUser)) {
             return "error/access-denied";
         }
-
+        depenseService.deleteByIdTicket(ticket);
         ticketService.delete(ticket);
+
         return "redirect:/employee/ticket/assigned-tickets";
     }
 

@@ -2,9 +2,13 @@ package site.easy.to.build.crm.my.model;
 
 
 
+import site.easy.to.build.crm.entity.Customer;
+
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class CustomerBudget {
@@ -46,6 +50,30 @@ public class CustomerBudget {
     public void setCustomerId(int customerId) {
         this.customerId = customerId;
     }
+
+    public static HashMap<Integer,Double> getCustomerBudgetBefore(Connection connection, int customerId, LocalDateTime date) throws SQLException {
+        List<CustomerBudget> budgets = new ArrayList<>();
+        HashMap<Integer,Double> map=new HashMap<>();
+        String query = "SELECT sum(montant) as montant FROM customer_budget where date_ens<=? and customer_id=?";
+        try(PreparedStatement statement=connection.prepareStatement(query))
+        {
+            statement.setTimestamp(1,Timestamp.valueOf(date));
+            statement.setInt(2,customerId);
+            try(ResultSet resultSet=statement.executeQuery())
+            {
+                if (resultSet.next())
+                {
+                    double montant =resultSet.getDouble("montant");
+
+                    map.put(customerId,montant);
+                    return map;
+                }
+            }
+        }
+        map.put(customerId, Double.valueOf(0));
+        return map ;
+    }
+
 
     public static List<CustomerBudget> getAll(Connection connection) throws SQLException {
         List<CustomerBudget> budgets = new ArrayList<>();

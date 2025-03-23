@@ -518,13 +518,20 @@ CREATE TABLE IF NOT EXISTS  depense(
 );
 
 
-CREATE TABLE IF NOT EXISTS <customer_budget(
-   id_budget_customer INT,
+CREATE TABLE IF NOT EXISTS customer_budget(
+   id_budget_customer INT AUTO_INCREMENT,
    date_ens DATE,
    montant DECIMAL(15,2),
-   customer_id INT NOT NULL,
+   customer_id int unsigned NOT NULL,
    PRIMARY KEY(id_budget_customer),
    FOREIGN KEY(customer_id) REFERENCES customer(customer_id)
 );
 
+
+create or replace view v_depenses_liees as
+select depense.*,trigger_lead.customer_id as customer_id
+from depense join trigger_lead on depense.lead_id=trigger_lead.lead_id
+union all
+select depense.*,trigger_ticket.customer_id as customer_id
+from depense join trigger_ticket on depense.ticket_id=trigger_ticket.ticket_id  ;
 

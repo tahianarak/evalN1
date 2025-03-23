@@ -3,6 +3,7 @@ import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class Depense {
@@ -55,6 +56,29 @@ public class Depense {
     }
 
     // Méthode pour obtenir toutes les dépenses
+
+    public static HashMap<Integer,Double> getCustomerDepense(Connection connection,LocalDateTime date,int customerId)throws Exception
+    {
+        String sql="select sum(montant) as montant from v_depenses_liees where date_ens<=? and customer_id=?";
+        HashMap<Integer,Double> map=new HashMap<>();
+        try(PreparedStatement statement=connection.prepareStatement(sql))
+        {
+            statement.setTimestamp(1,Timestamp.valueOf( date));
+            statement.setInt(2,customerId);
+            try(ResultSet resultSet=statement.executeQuery())
+            {
+                if (resultSet.next())
+                {
+
+                    map.put(customerId, resultSet.getDouble("montant"));
+                    return  map;
+                }
+            }
+        }
+        map.put(customerId, Double.valueOf(0));
+        return map ;
+    }
+
     public static List<Depense> getAll(Connection connection) throws SQLException {
         List<Depense> depenses = new ArrayList<>();
         String query = "SELECT * FROM depense";
@@ -79,6 +103,48 @@ public class Depense {
         String query = "SELECT * FROM depense WHERE id_depense = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Depense depense = new Depense();
+                    depense.setIdDepense(rs.getInt("id_depense"));
+                    depense.setMontant(rs.getDouble("montant"));
+                    // Conversion de la colonne DATE vers LocalDateTime
+                    depense.setDateEns(rs.getTimestamp("date_ens").toLocalDateTime());
+                    depense.setLeadId(rs.getInt("lead_id"));
+                    depense.setTicketId(rs.getInt("ticket_id"));
+                    return depense;
+                }
+            }
+        }
+        return null;
+    }
+
+
+
+    public static Depense getByIdLead(Connection connection, int idLead) throws SQLException {
+        String query = "SELECT * FROM depense WHERE Lead_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, idLead);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Depense depense = new Depense();
+                    depense.setIdDepense(rs.getInt("id_depense"));
+                    depense.setMontant(rs.getDouble("montant"));
+                    // Conversion de la colonne DATE vers LocalDateTime
+                    depense.setDateEns(rs.getTimestamp("date_ens").toLocalDateTime());
+                    depense.setLeadId(rs.getInt("lead_id"));
+                    depense.setTicketId(rs.getInt("ticket_id"));
+                    return depense;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static Depense getByIdTicket(Connection connection, int idTicket) throws SQLException {
+        String query = "SELECT * FROM depense WHERE Lead_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, idTicket);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     Depense depense = new Depense();

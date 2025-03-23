@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -85,6 +86,25 @@ public class LeadController {
         this.depenseService=depenseService1;
     }
 
+    @PostMapping("/confirmer")
+    public String confirmerTransaction(HttpSession session) throws Exception {
+        Depense depense=(Depense) session.getAttribute("depense");
+        Lead lead=(Lead)session.getAttribute("lead");
+        session.removeAttribute("depense");
+        session.removeAttribute("lead");
+        Lead createdLead = leadService.save(lead);
+        depense.setLeadId(createdLead.getLeadId());
+        String alerte=depenseService.insertDepense(depense,createdLead.getCustomer().getCustomerId());
+         return "redirect:/employee/lead/assigned-leads";
+    }
+
+    @PostMapping("/annuler")
+    public String annulerTransaction(HttpSession session) throws Exception {
+        session.removeAttribute("depense");
+        session.removeAttribute("lead");
+        return "redirect:/employee/lead/assigned-leads";
+    }
+
     @GetMapping("/show/{id}")
     public String showDetails(@PathVariable("id") int id, Model model, Authentication authentication) {
         int userId = authenticationUtils.getLoggedInUserId(authentication);
@@ -128,10 +148,11 @@ public class LeadController {
     }
 
     @GetMapping("/assigned-leads")
-    public String showAssignedEmployeeLeads(Authentication authentication, Model model) {
+    public String showAssignedEmployeeLeads(Authentication authentication, Model model,@RequestParam(name = "alerte", required = false)  String alerte){
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         List<Lead> leads = leadService.findAssignedLeads(userId);
         model.addAttribute("leads", leads);
+        model.addAttribute("alerte",alerte);
         return "lead/show-my-leads";
     }
 
@@ -172,7 +193,8 @@ public class LeadController {
     public String createLead(@ModelAttribute("lead") @Validated Lead lead, BindingResult bindingResult,
                              @RequestParam("customerId") int customerId, @RequestParam("employeeId") int employeeId,
                              Authentication authentication, @RequestParam("allFiles")@Nullable String files,
-                             @RequestParam("folderId") @Nullable String folderId, Model model)throws Exception {
+                             @RequestParam("folderId") @Nullable String folderId, Model model
+                             ,HttpSession session)throws Exception {
 
         int userId = authenticationUtils.getLoggedInUserId(authentication);
         User manager = userService.findById(userId);
@@ -217,10 +239,18 @@ public class LeadController {
             }
         }
 
+        //pop-up depassement budget
+        if(!depenseService.checkBudget(depense,lead.getCustomer().getCustomerId()))
+        {
+            session.setAttribute("lead",lead);
+            session.setAttribute("depense",depense);
+            model.addAttribute("popUp",true);
 
+            return "lead/create-lead";
+        }
         Lead createdLead = leadService.save(lead);
         depense.setLeadId(createdLead.getLeadId());
-        depenseService.insertDepense(depense);
+        String alerte=depenseService.insertDepense(depense,createdLead.getCustomer().getCustomerId());
 
         fileUtil.saveFiles(allFiles, createdLead);
 
@@ -229,12 +259,12 @@ public class LeadController {
         }
 
         if (lead.getStatus().equals("meeting-to-schedule")) {
-            return "redirect:/employee/calendar/create-event?leadId=" + lead.getLeadId();
+            return "redirect:/employee/lead/assigned-leads?alerte="+alerte;
         }
         if(AuthorizationUtil.hasRole(authentication, "ROLE_MANAGER")) {
-            return "redirect:/employee/lead/created-leads";
+            return "redirect:/employee/lead/assigned-leads?alerte="+alerte;
         }
-        return "redirect:/employee/lead/assigned-leads";
+        return "redirect:/employee/lead/assigned-leads?alerte="+alerte;
     }
 
     @GetMapping("/update/{id}")
@@ -464,7 +494,7 @@ public class LeadController {
     }
 
     @PostMapping("/delete/{id}")
-    public String deleteLead(@PathVariable("id") int id, Authentication authentication) {
+    public String deleteLead(@PathVariable("id") int id, Authentication authentication) throws Exception {
         Lead lead = leadService.findByLeadId(id);
 
         User employee = lead.getEmployee();
@@ -477,7 +507,9 @@ public class LeadController {
             return "error/access-denied";
         }
 
+        depenseService.deleteByIdLead(lead);
         leadService.delete(lead);
+
         return "redirect:/employee/lead/created-leads";
     }
 

@@ -21,6 +21,8 @@ public class DatabaseIniter
                 "TRUNCATE TABLE trigger_contract",
                 "TRUNCATE TABLE trigger_lead",
                 "TRUNCATE TABLE trigger_ticket",
+                "TRUNCATE TABLE depense",
+                "TRUNCATE TABLE  customer_budget",
                 "set foreign_key_checks=1"
         };
         try(Statement statement= connection.createStatement()) {

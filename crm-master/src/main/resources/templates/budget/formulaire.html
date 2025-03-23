@@ -2,11 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <div th:insert="~{/general/head.html}"></div>
-
+<meta name="_csrf" content="${_csrf.token}"/>
+<meta name="_csrf_header" content="${_csrf.headerName}"/>
+<link rel="stylesheet" th:href="@{/css/bootstrap-wysihtml5.css}"/>
 <!-- Editable CSS -->
-
+<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
 <!-- Custom CSS -->
-<link th:href="@{/css/bootstrap-wysihtml5.css}" rel="stylesheet">
 <link th:href="@{/css/style.min.css}" rel="stylesheet">
 <!-- page css -->
 <link th:href="@{/css/pages/inbox.css}" rel="stylesheet">
@@ -50,46 +51,6 @@
     <!-- ============================================================== -->
     <!-- Page wrapper  -->
     <!-- ============================================================== -->
-
-    <div id="budgetExceededModal" class="modal" tabindex="-1" role="dialog" th:attr="style=${popUp} ? 'display:block;' : 'display:none;'">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Alerte Dépense</h5>
-                </div>
-                <div class="modal-body">
-                    <p>La dépense dépasse le budget autorisé. Voulez-vous continuer ?</p>
-                </div>
-                <div class="modal-footer">
-                    <!-- Form pour Annuler -->
-                    <form th:action="@{/employee/ticket/annuler}" method="post">
-                        <button type="submit" class="btn btn-secondary" id="cancelButton">Annuler</button>
-                    </form>
-
-                    <!-- Form pour Confirmer -->
-                    <form th:action="@{/employee/ticket/confirmer}" method="post">
-                        <button type="submit" class="btn btn-primary" id="confirmExpense">Confirmer</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        $(document).ready(function () {
-            var showModal = [[${popUp}]] ? true : false; // Correction de la variable
-            if (showModal) {
-                $('#budgetExceededModal').modal('show');
-            }
-
-            // Fermeture du modal après un clic sur un bouton
-            $("#confirmExpense, #cancelButton").click(function() {
-                $("#budgetExceededModal").modal("hide");
-            });
-        });
-    </script>
-
-
     <div class="page-wrapper">
         <!-- ============================================================== -->
         <!-- Container fluid  -->
@@ -105,91 +66,43 @@
             <!-- ============================================================== -->
             <!-- Start Page Content -->
             <!-- ============================================================== -->
+
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="card-title">Create New Ticket</h4>
-                            <form th:object="${ticket}" th:action="@{/employee/ticket/create-ticket}" method="post">
+                            <h4 class="card-title">Créer un Budget</h4>
+                            <form th:action="@{/employee/customerBudget/create}" method="post">
 
-                                <label class="m-t-20" for="subject">Subject:</label>
+                                <label class="m-t-20" for="customerId">Client:</label>
                                 <div class="input-group">
-                                    <input type="text" id="subject" th:field="*{subject}" class="form-control">
-                                </div>
-                                <div class="input-group">
-                                    <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}"></span>
-                                </div>
-
-                                <label class="m-t-20" for="description">Description:</label>
-                                <div class="input-group">
-                                    <textarea class="textarea_editor form-control" id="description" rows="15" placeholder="Enter text ..." th:field="*{description}"></textarea>
-                                </div>
-                                <div class="input-group">
-                                    <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('description')}" th:errors="*{description}" autocomplete="off"></span>
-                                </div>
-
-                                <label class="m-t-20" for="montant">Montant:</label>
-                                <div class="input-group">
-                                    <input type="number" id="montant" th:field="*{montant}" class="form-control">
-                                </div>
-                                <div class="input-group">
-                                    <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('montant')}" th:errors="*{montant}" autocomplete="off"></span>
-                                </div>
-
-                                <label class="m-t-20" for="status">status:</label>
-                                <div class="input-group">
-                                    <select id="status" th:field="*{status}" class="form-control">
-                                        <option value="open">Open</option>
-                                        <option value="assigned">Assigned</option>
-                                        <option value="on-hold">On Hold</option>
-                                        <option value="in-progress">In Progress</option>
-                                        <option value="resolved">Resolved</option>
-                                        <option value="closed">Closed</option>
-                                        <option value="reopened">Reopened</option>
-                                        <option value="pending-customer-response">Pending Customer Response</option>
-                                        <option value="escalated">Escalated</option>
-                                        <option value="archived">Archived</option>
-                                    </select>
-                                </div>
-                                <div class="input-group">
-                                    <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('status')}" th:errors="*{status}"></span>
-                                </div>
-
-                                <label class="m-t-20" for="priority">Priority:</label>
-                                <div class="input-group">
-                                    <select id="priority" th:field="*{priority}" class="form-control">
-                                        <option value="low">Low</option>
-                                        <option value="medium">Medium</option>
-                                        <option value="high">High</option>
-                                        <option value="closed">Closed</option>
-                                        <option value="urgent">Urgent</option>
-                                        <option value="critical">Critical</option>
-                                    </select>
-                                </div>
-                                <div class="input-group">
-                                    <span class="text-danger font-weight-bold" th:if="${#fields.hasErrors('priority')}" th:errors="*{priority}"></span>
-                                </div>
-
-                                <label class="m-t-20" for="employeeId">Assign Employee:</label>
-                                <div class="input-group">
-                                    <select name="employeeId" id="employeeId" class="form-control">
-                                        <option th:each="employee : ${employees}" th:text="${employee.username}" th:value="${employee.id}"></option>
-                                    </select>
-                                </div>
-
-                                <label class="m-t-20" for="customerId">Customer:</label>
-                                <div class="input-group">
-                                    <select name="customerId" id="customerId" class="form-control">
+                                    <select id="customerId" name="idCustomer" class="form-control">
                                         <option th:each="customer : ${customers}" th:text="${customer.name}" th:value="${customer.customerId}"></option>
                                     </select>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary m-t-20">Create ticket</button>
+                                <label class="m-t-20" for="montant">Montant:</label>
+                                <div class="input-group">
+                                    <input type="number" id="montant" name="montant" class="form-control" required>
+                                </div>
+
+                                <label class="m-t-20" for="date">Date:</label>
+                                <div class="input-group">
+                                    <input type="date" id="date" name="date" class="form-control" required>
+                                </div>
+
+                                <div class="text-center m-t-20">
+                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                    <a th:href="@{/budget}" class="btn btn-secondary">Annuler</a>
+                                </div>
+
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
+
+
             <!-- ============================================================== -->
             <!-- End Page Content -->
             <!-- ============================================================== -->
@@ -245,11 +158,39 @@
 
 <script th:src="@{/js/library/wysihtml5-0.3.0.js}"></script>
 <script th:src="@{/js/library/bootstrap-wysihtml5.js}"></script>
+<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
 <script>
+    Dropzone.autoDiscover = false;
     $(document).ready(function() {
         $('.textarea_editor').wysihtml5();
     });
 </script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
 
+    var existingFiles = /*[[${attachments}]]*/ 'default';
+    var folders = /*[[${folders}]]*/ 'default';
+    var driveFolderId = "";
+
+    /*]]>*/
+</script>
+<script th:src="@{/js/general-dropzone.js}" type="text/javascript"
+        th:data-csrf-token="${_csrf.token}" th:data-csrf-header="${_csrf.headerName}"></script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
