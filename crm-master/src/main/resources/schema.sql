@@ -528,10 +528,20 @@ CREATE TABLE IF NOT EXISTS customer_budget(
 );
 
 
+create table if not EXISTS pourcentage
+(
+    id_pourcentage int primary key AUTO_INCREMENT,
+    valeur decimal(5,2)
+);
+
+
 create or replace view v_depenses_liees as
-select depense.*,trigger_lead.customer_id as customer_id
+select depense.*,trigger_lead.customer_id as customer_id,customer.name,trigger_lead.name as description
 from depense join trigger_lead on depense.lead_id=trigger_lead.lead_id
+join customer on customer.customer_id=trigger_lead.customer_id
 union all
-select depense.*,trigger_ticket.customer_id as customer_id
-from depense join trigger_ticket on depense.ticket_id=trigger_ticket.ticket_id  ;
+select depense.*,trigger_ticket.customer_id as customer_id,customer.name,trigger_ticket.description as description
+from depense join trigger_ticket on depense.ticket_id=trigger_ticket.ticket_id
+join customer on customer.customer_id=trigger_ticket.customer_id
+;
 

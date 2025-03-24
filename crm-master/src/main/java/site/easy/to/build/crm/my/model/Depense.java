@@ -8,11 +8,72 @@ import java.util.List;
 
 public class Depense {
 
+    double pourcentage;
     private int idDepense;
     private double montant;  // Utilisation du type primitif 'double' ici
     private LocalDateTime dateEns;  // Utilisation de LocalDateTime
     private Integer leadId;
     private Integer ticketId;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public static void updatePourcentage(Connection connection,double pourcentage)throws Exception
+    {
+        String sql ="update pourcentage set valeur=?";
+        try(PreparedStatement preparedStatement=connection.prepareStatement(sql))
+        {
+            preparedStatement.setDouble(1,pourcentage);
+
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    public static  double getPourcentage(Connection connection)throws Exception
+    {
+        String sql="select valeur from pourcentage";
+        try(Statement statement=connection.createStatement())
+        {
+            try(ResultSet rs=statement.executeQuery(sql))
+            {
+                if(rs.next())
+                {
+                    return rs.getDouble(("valeur"));
+                }
+            }
+        }
+        return 0;
+    }
+
+    String description;
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    String customerName;
+
+    public Integer getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(Integer customerId) {
+        this.customerId = customerId;
+    }
+
+    private Integer customerId;
+
+    public void setLeadId(Integer leadId) {
+        this.leadId = leadId;
+    }
 
     // Getters et setters
     public int getIdDepense() {
@@ -78,6 +139,28 @@ public class Depense {
         map.put(customerId, Double.valueOf(0));
         return map ;
     }
+
+    public static List<Depense> getAllWithCust(Connection connection) throws SQLException {
+        List<Depense> depenses = new ArrayList<>();
+        String query = "SELECT * FROM v_depenses_liees ";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                Depense depense = new Depense();
+                depense.setIdDepense(rs.getInt("id_depense"));
+                depense.setMontant(rs.getDouble("montant"));
+                depense.setDateEns(rs.getTimestamp("date_ens").toLocalDateTime());
+                depense.setLeadId(rs.getInt("lead_id"));
+                depense.setTicketId(rs.getInt("ticket_id"));
+                depense.setCustomerId(rs.getInt("customer_id"));
+                depense.setCustomerName(rs.getString("name"));
+                depense.setDescription(rs.getString("description"));
+                depenses.add(depense);
+            }
+        }
+        return depenses;
+    }
+
 
     public static List<Depense> getAll(Connection connection) throws SQLException {
         List<Depense> depenses = new ArrayList<>();
@@ -170,6 +253,16 @@ public class Depense {
             stmt.setInt(3, this.leadId);
             stmt.setInt(4, this.ticketId);
             stmt.setInt(5, this.idDepense);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        }
+    }
+
+    public static boolean updateMontant(Connection connection,double montant,long idDepense) throws SQLException {
+        String query = "UPDATE depense SET montant = ? WHERE id_depense = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setDouble(1, montant);
+            stmt.setLong(2, idDepense);
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
         }
