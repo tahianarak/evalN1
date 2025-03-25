@@ -2,6 +2,7 @@ package site.easy.to.build.crm.my.model;
 
 
 
+import jakarta.persistence.*;
 import site.easy.to.build.crm.entity.Customer;
 
 import java.sql.*;
@@ -10,13 +11,35 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
+@Entity
+@Table(name = "customer_budget")
 public class CustomerBudget {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_budget_customer")
     private int idBudgetCustomer;
+
+    @Column(name = "montant")
     private double montant;
+
+    @Column(name="date_ens")
     private LocalDate dateEns;
+    @Column(name = "customer_id")
     private int customerId;
+
+    @Transient
+    private  int ligne;
+
+    public int getLigne() {
+        return ligne;
+    }
+
+    public void setLigne(int ligne) {
+        this.ligne = ligne;
+    }
+
+
 
     // Getters et setters
     public int getIdBudgetCustomer() {
@@ -31,10 +54,23 @@ public class CustomerBudget {
         return montant;
     }
 
-    public void setMontant(double montant) {
+    public void setMontant(double montant)throws Exception
+    {
+        if(montant<0)
+        {
+            throw new Exception("montant negatif pour la ligne de donnees:"+this.getLigne()+" dans les donnees de budgets");
+        }
         this.montant = montant;
     }
+    public void setMontant(String valeur)throws Exception
+    {
+        valeur=valeur.replace(".","");
+        valeur=valeur.replace(',','.');
+        valeur=valeur.replace(" ","");
+        double montant=Double.valueOf(valeur);
+        setMontant(montant);
 
+    }
     public LocalDate getDateEns() {
         return dateEns;
     }
@@ -75,7 +111,7 @@ public class CustomerBudget {
     }
 
 
-    public static List<CustomerBudget> getAll(Connection connection) throws SQLException {
+    public static List<CustomerBudget> getAll(Connection connection) throws Exception {
         List<CustomerBudget> budgets = new ArrayList<>();
         String query = "SELECT * FROM customer_budget";
         try (Statement stmt = connection.createStatement();
@@ -92,7 +128,7 @@ public class CustomerBudget {
         return budgets;
     }
 
-    public static CustomerBudget getById(Connection connection, int id) throws SQLException {
+    public static CustomerBudget getById(Connection connection, int id) throws Exception {
         String query = "SELECT * FROM customer_budget WHERE id_budget_customer = ?";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, id);

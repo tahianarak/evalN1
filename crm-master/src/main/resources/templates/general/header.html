@@ -29,7 +29,8 @@
             <a th:if="${#authorization.expression('hasRole(''ROLE_MANAGER'')')}"
                th:href="@{/manager/deleteData}"<button class="reinitialiser-btn">reinitialiser</button></a>
 
-            <a href="http://localhost:5001/Depense/Liste"><button class="reinitialiser-btn">dashboard</button></a>
+            <a href="http://localhost:5001/Depense/Liste"><button  class="btn-dashboard">dashboard</button></a>
+            <a th:href="@{/import/manager/form}"><button class="btn-data-import">Data import</button></a>
 
             <!-- ============================================================== -->
             <!-- User profile and search -->
@@ -104,4 +105,36 @@
         outline: none; /* Retirer la bordure bleue par défaut */
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); /* Ajoute une ombre portée au focus */
     }
+    .btn-dashboard {
+    background-color: #800080; /* Vert */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.btn-dashboard:hover {
+    background-color: #45a049; /* Vert plus foncé au survol */
+}
+
+/* Style pour le bouton "Data Import" */
+.btn-data-import {
+    background-color: #f44336; /* Rouge */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.btn-data-import:hover {
+    background-color: #e53935; /* Rouge plus foncé au survol */
+}
 </style>

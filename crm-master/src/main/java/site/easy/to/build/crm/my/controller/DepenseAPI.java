@@ -39,9 +39,9 @@ public class DepenseAPI {
         }
     }
     @PostMapping("/update")
-    public ResponseEntity<String> updateDepense(@RequestParam Long idDepense, @RequestParam double montant) {
+    public ResponseEntity<String> updateDepense(@RequestParam Long idDepense, @RequestParam String montant) {
         try {
-            boolean updated = depenseService.modify(montant,idDepense);
+            boolean updated = depenseService.modify(Double.parseDouble(montant),idDepense);
             if (updated) {
                 return ResponseEntity.ok("Dépense mise à jour avec succès");
             } else {

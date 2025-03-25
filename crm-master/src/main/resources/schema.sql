@@ -540,8 +540,18 @@ select depense.*,trigger_lead.customer_id as customer_id,customer.name,trigger_l
 from depense join trigger_lead on depense.lead_id=trigger_lead.lead_id
 join customer on customer.customer_id=trigger_lead.customer_id
 union all
-select depense.*,trigger_ticket.customer_id as customer_id,customer.name,trigger_ticket.description as description
+select depense.*,trigger_ticket.customer_id as customer_id,customer.name,trigger_ticket.subject as description
 from depense join trigger_ticket on depense.ticket_id=trigger_ticket.ticket_id
 join customer on customer.customer_id=trigger_ticket.customer_id
 ;
+
+CREATE TABLE if not EXISTS customer_data (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_email VARCHAR(255) NOT NULL,
+    subject_or_name VARCHAR(255) NOT NULL,
+    type ENUM('lead', 'ticket') NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    expense DOUBLE NOT NULL
+);
+
 

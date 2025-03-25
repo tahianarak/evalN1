@@ -1,4 +1,7 @@
 package site.easy.to.build.crm.my.model;
+import jakarta.persistence.*;
+
+
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -6,14 +9,29 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+@Entity
+@Table(name="depense")
 public class Depense {
 
+    @Transient
     double pourcentage;
+
+    @Id
+    @Column(name ="id_depense")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idDepense;
-    private double montant;  // Utilisation du type primitif 'double' ici
-    private LocalDateTime dateEns;  // Utilisation de LocalDateTime
+
+    @Column(name="montant")
+    private double montant;
+    @Column(name = "date_ens")// Utilisation du type primitif 'double' ici
+    private LocalDateTime dateEns;
+
+    @Column(name = "lead_id")// Utilisation de LocalDateTime
     private Integer leadId;
+    @Column(name = "ticket_id")
     private Integer ticketId;
+    @Transient
+    private Integer customerId;
 
     public String getDescription() {
         return description;
@@ -50,7 +68,11 @@ public class Depense {
         return 0;
     }
 
+    @Transient
     String description;
+    @Transient
+    String customerName;
+
     public String getCustomerName() {
         return customerName;
     }
@@ -59,7 +81,7 @@ public class Depense {
         this.customerName = customerName;
     }
 
-    String customerName;
+
 
     public Integer getCustomerId() {
         return customerId;
@@ -69,7 +91,7 @@ public class Depense {
         this.customerId = customerId;
     }
 
-    private Integer customerId;
+
 
     public void setLeadId(Integer leadId) {
         this.leadId = leadId;

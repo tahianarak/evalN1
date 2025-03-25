@@ -7,6 +7,7 @@ import site.easy.to.build.crm.entity.Lead;
 import site.easy.to.build.crm.entity.Ticket;
 import site.easy.to.build.crm.my.model.CustomerBudget;
 import site.easy.to.build.crm.my.model.Depense;
+import site.easy.to.build.crm.my.repository.DepenseRepository;
 import site.easy.to.build.crm.service.lead.LeadServiceImpl;
 import site.easy.to.build.crm.service.ticket.TicketService;
 
@@ -27,6 +28,15 @@ public class DepenseService
 
     @Autowired
     TicketService ticketService;
+
+    @Autowired
+    DepenseRepository depenseRepository;
+
+
+    public void save(Depense depense)
+    {
+        depenseRepository.save(depense);
+    }
 
     @Transactional
     public void deleteRecursive(int idDepense)throws Exception

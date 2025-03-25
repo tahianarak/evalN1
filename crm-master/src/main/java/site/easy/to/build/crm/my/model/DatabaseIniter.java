@@ -23,6 +23,8 @@ public class DatabaseIniter
                 "TRUNCATE TABLE trigger_ticket",
                 "TRUNCATE TABLE depense",
                 "TRUNCATE TABLE  customer_budget",
+                "TRUNCATE TABLE customer",
+                "TRUNCATE TABLE customer_data",
                 "set foreign_key_checks=1"
         };
         try(Statement statement= connection.createStatement()) {
