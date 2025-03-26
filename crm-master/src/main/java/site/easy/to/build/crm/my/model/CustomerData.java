@@ -50,7 +50,8 @@ public class CustomerData {
     }
 
     public void setStatus(String status) throws Exception
-    {
+    {   status=status.trim();
+        status=status.toLowerCase();
         if(this.getType().equalsIgnoreCase("lead"))
         {
             for(int i=0;i<leadsStatus.length;i++)
@@ -83,7 +84,14 @@ public class CustomerData {
         valeur=valeur.replace(".","");
         valeur=valeur.replace(',','.');
         valeur=valeur.replace(" ","");
-        double montant=Double.valueOf(valeur);
+        double montant=0;
+        try {
+            montant = Double.valueOf(valeur);
+        }
+        catch (Exception e)
+        {
+            throw new Exception("format de date invalide ,dans les donnees de depenses a la ligne "+ligne);
+        }
         setExpense(montant);
 
     }
@@ -119,7 +127,10 @@ public class CustomerData {
         this.subjectOrName = subjectOrName;
     }
 
-    public void setType(String type) {
+    public void setType(String type)
+    {
+        type=type.toLowerCase();
+        type=type.trim();
         if (!type.equalsIgnoreCase("lead") && !type.equalsIgnoreCase("ticket")) {
             throw new IllegalArgumentException("Type doit être 'lead' ou 'ticket'. sur la ligne"+this.getLigne()+" dans les donnees de depenses");
         }

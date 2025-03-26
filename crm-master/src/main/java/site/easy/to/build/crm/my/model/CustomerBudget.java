@@ -67,7 +67,14 @@ public class CustomerBudget {
         valeur=valeur.replace(".","");
         valeur=valeur.replace(',','.');
         valeur=valeur.replace(" ","");
-        double montant=Double.valueOf(valeur);
+        double montant=0;
+        try {
+            montant = Double.valueOf(valeur);
+        }
+        catch (Exception e)
+        {
+            throw new Exception("format de date invalide ,dans les donnees de budgets a la ligne "+ligne);
+        }
         setMontant(montant);
 
     }

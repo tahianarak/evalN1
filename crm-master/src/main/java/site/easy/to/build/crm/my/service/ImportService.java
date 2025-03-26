@@ -77,11 +77,9 @@ public class ImportService {
 
         try
         {
-
-                importCsvCustomer(customerFile, authentication);
-                importDataCustomer(dataCustomerFileName, authentication);
-                importBudgetCustomer(budgetCustomerFile, authentication);
-
+            importCsvCustomer(customerFile, authentication);
+            importBudgetCustomer(budgetCustomerFile, authentication);
+            importDataCustomer(dataCustomerFileName, authentication);
         }
         catch (Exception e)
         {
